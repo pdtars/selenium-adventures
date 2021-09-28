@@ -7,6 +7,7 @@ driver = webdriver.Chrome(executable_path=chrome_driver_path)
 
 driver.get("https://orteil.dashnet.org/cookieclicker/")
 time.sleep(3)
+cookie = driver.find_element_by_css_selector("#bigCookie")
 
 
 def save_game():
@@ -50,9 +51,13 @@ def load_game(save_file):
 
 load_game("save_game.txt")
 
-for i in range(0, 10):
-    cookie = driver.find_element_by_css_selector("#bigCookie")
+baking_timer = time.time() + 3
+
+while baking_timer > time.time():
     cookie.click()
+
+# for i in range(0, 10):
+#     cookie.click()
 
 total_cookies = driver.find_element_by_css_selector("#cookies")
 print(total_cookies.text)
