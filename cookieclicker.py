@@ -10,6 +10,7 @@ time.sleep(3)
 cookie = driver.find_element_by_css_selector("#bigCookie")
 
 
+######### FUNCTIONS #########
 def save_game():
     time.sleep(1)
     options = driver.find_element_by_css_selector("#prefsButton")
@@ -49,18 +50,43 @@ def load_game(save_file):
     close_option_menu.click()
 
 
-load_game("save_game.txt")
+def get_market_items():
+    store_item = driver.find_elements_by_css_selector("#store #products .product.unlocked.enabled")  # .title")
+    store_item_price = driver.find_elements_by_css_selector("#store #products .product.unlocked.enabled .price")
 
-baking_timer = time.time() + 3
+    item_ids = [item.get_attribute("id") for item in store_item]
+    item_prices = [int(item.text) for item in store_item_price]
+
+    item_and_prices = {item_ids[item]: item_prices[item] for item in range(len(item_ids))}
+
+    return item_and_prices
+
+
+######### END FUNCTIONS #########
+
+# load_game("save_game.txt")
+
+baking_timer = time.time() + 7
+time_break = time.time() + 5
 
 while baking_timer > time.time():
     cookie.click()
 
-# for i in range(0, 10):
-#     cookie.click()
+    # Get item prices
+    if time.time() >= time_break:
+        item_and_prices = get_market_items()
+        # print(item_and_prices)
 
-total_cookies = driver.find_element_by_css_selector("#cookies")
-print(total_cookies.text)
+    # Get cookie count(i.e. money) for store purchases
+    _ = driver.find_element_by_css_selector("#cookies")
+    cookie_text_string = _.text
+    cookie_text_string = cookie_text_string.split()
+    CPS = int(cookie_text_string[-1])
+    total_cookies = int(cookie_text_string[0])
+
+
+# Adicionar time_break + segundos ao final
+
 
 time.sleep(2)
-save_game()
+# save_game()
