@@ -75,18 +75,38 @@ while baking_timer > time.time():
     # Get item prices
     if time.time() >= time_break:
         item_and_prices = get_market_items()
+        if len(item_and_prices) == 0:
+            continue
         # print(item_and_prices)
 
     # Get cookie count(i.e. money) for store purchases
-    _ = driver.find_element_by_css_selector("#cookies")
-    cookie_text_string = _.text
-    cookie_text_string = cookie_text_string.split()
-    CPS = int(cookie_text_string[-1])
-    total_cookies = int(cookie_text_string[0])
+        _ = driver.find_element_by_css_selector("#cookies")
+        cookie_text_string = _.text
+        cookie_text_string = cookie_text_string.split()
+        CPS = int(cookie_text_string[-1])
+        total_cookies = int(cookie_text_string[0])
+
+        #Buy upgrades
+        for k, v in item_and_prices.items():
+            while True:
+                if total_cookies >= item_and_prices[k]:
+                    prod = driver.find_element_by_id(k)
+                    prod.click()
+                    total_cookies -= item_and_prices[k]
+                    time.sleep(3)
+                else:
+                    break
+
+        time_break = time.time() + 5
 
 
-# Adicionar time_break + segundos ao final
 
+
+
+
+# TODO Implementar loop
+
+#TODO Implementar compra de upgrades dos items da store
 
 time.sleep(2)
 # save_game()
