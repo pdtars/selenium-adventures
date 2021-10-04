@@ -66,7 +66,7 @@ def get_market_items():
 
 # load_game("save_game.txt")
 
-baking_timer = time.time() + 7
+baking_timer = time.time() + 300
 time_break = time.time() + 5
 
 while baking_timer > time.time():
@@ -83,7 +83,7 @@ while baking_timer > time.time():
         _ = driver.find_element_by_css_selector("#cookies")
         cookie_text_string = _.text
         cookie_text_string = cookie_text_string.split()
-        CPS = int(cookie_text_string[-1])
+        #CPS = int(cookie_text_string[-1])
         total_cookies = int(cookie_text_string[0])
 
         #Buy upgrades
@@ -93,18 +93,13 @@ while baking_timer > time.time():
                     prod = driver.find_element_by_id(k)
                     prod.click()
                     total_cookies -= item_and_prices[k]
-                    time.sleep(3)
+                    time.sleep(1)
                 else:
                     break
 
         time_break = time.time() + 5
 
 
-
-
-
-
-# TODO Implementar loop
 
 #TODO Implementar compra de upgrades dos items da store
 
