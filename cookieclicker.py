@@ -2,7 +2,7 @@ from selenium import webdriver
 # from selenium.webdriver.common.keys import Keys
 import time
 
-chrome_driver_path = "E:\webdriver\chromedriver.exe"
+chrome_driver_path = "E:\\webdriver\\chromedriver.exe"
 driver = webdriver.Chrome(executable_path=chrome_driver_path)
 
 driver.get("https://orteil.dashnet.org/cookieclicker/")
@@ -10,8 +10,9 @@ time.sleep(3)
 cookie = driver.find_element_by_css_selector("#bigCookie")
 
 
-######### FUNCTIONS #########
+# FUNCTIONS
 def save_game():
+    """Saves the game to a text file"""
     time.sleep(1)
     options = driver.find_element_by_css_selector("#prefsButton")
     options.click()
@@ -28,6 +29,7 @@ def save_game():
 
 
 def load_game(save_file):
+    """Loads the game previously store in a .txt file"""
     with open(save_file) as file:
         save = file.readline()
     print(save)
@@ -51,20 +53,34 @@ def load_game(save_file):
 
 
 def get_market_items():
+    """Obtains the price of all available items in the Store"""
     store_item = driver.find_elements_by_css_selector("#store #products .product.unlocked.enabled")  # .title")
     store_item_price = driver.find_elements_by_css_selector("#store #products .product.unlocked.enabled .price")
 
     item_ids = [item.get_attribute("id") for item in store_item]
-    item_prices = [int(item.text) for item in store_item_price]
+    item_prices = [int(item.text.replace(",", "")) for item in store_item_price]
 
     item_and_prices = {item_ids[item]: item_prices[item] for item in range(len(item_ids))}
 
     return item_and_prices
 
 
-######### END FUNCTIONS #########
+def buy_upgrade(store_item_upgrade_object):
+    """Buy upgrades for store items"""
+    for i in store_item_upgrade_object:
+        up_id = i.get_attribute("id")
+        try:
+            driver.find_element_by_id(up_id)
+        except KeyError:
+            print("upgrade not found")
+        else:
+            upgrade = driver.find_element_by_id(up_id)
+            upgrade.click()
 
-# load_game("save_game.txt")
+
+# END FUNCTIONS
+
+#load_game("save_game.txt")
 
 baking_timer = time.time() + 300
 time_break = time.time() + 5
@@ -74,34 +90,36 @@ while baking_timer > time.time():
 
     # Get item prices
     if time.time() >= time_break:
-        item_and_prices = get_market_items()
-        if len(item_and_prices) == 0:
-            continue
-        # print(item_and_prices)
+        store_items_and_prices = get_market_items()
 
-    # Get cookie count(i.e. money) for store purchases
+        if len(store_items_and_prices) == 0:
+            continue
+
+        # Get cookie count(i.e. money) for store purchases
         _ = driver.find_element_by_css_selector("#cookies")
         cookie_text_string = _.text
         cookie_text_string = cookie_text_string.split()
-        #CPS = int(cookie_text_string[-1])
-        total_cookies = int(cookie_text_string[0])
+        # CPS = int(cookie_text_string[-1])
+        total_cookies = int(cookie_text_string[0].replace(",", ""))
 
-        #Buy upgrades
-        for k, v in item_and_prices.items():
+        # Buy store items
+        for k, v in store_items_and_prices.items():
             while True:
-                if total_cookies >= item_and_prices[k]:
+                if total_cookies >= store_items_and_prices[k]:
                     prod = driver.find_element_by_id(k)
                     prod.click()
-                    total_cookies -= item_and_prices[k]
+                    total_cookies -= store_items_and_prices[k]
                     time.sleep(1)
                 else:
                     break
 
-        time_break = time.time() + 5
+        # Buy upgrades:
+        store_item_upgrade = driver.find_elements_by_css_selector("#store #upgrades .crate.upgrade.enabled")
+        # print(f"Length of store item upgrades: {len(store_item_upgrade)}")
+        if len(store_item_upgrade) >= 1:
+            buy_upgrade(store_item_upgrade)
 
-
-
-#TODO Implementar compra de upgrades dos items da store
+        time_break = time.time() + 10
 
 time.sleep(2)
-# save_game()
+save_game()
