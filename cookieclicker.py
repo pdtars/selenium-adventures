@@ -1,3 +1,4 @@
+import selenium.common.exceptions
 from selenium import webdriver
 # from selenium.webdriver.common.keys import Keys
 import time
@@ -67,7 +68,8 @@ def get_market_items():
 
 def buy_upgrade(store_item_upgrade_object):
     """Buy upgrades for store items"""
-    for i in store_item_upgrade_object:
+
+    for i in store_item_upgrade_object[:1]:
         up_id = i.get_attribute("id")
         try:
             driver.find_element_by_id(up_id)
@@ -107,9 +109,19 @@ while baking_timer > time.time():
             while True:
                 if total_cookies >= store_items_and_prices[k]:
                     prod = driver.find_element_by_id(k)
-                    prod.click()
-                    total_cookies -= store_items_and_prices[k]
-                    time.sleep(1)
+                    # prod.click()
+                    try:
+                        prod.click()
+                        time.sleep(1)
+                    except selenium.common.exceptions.ElementClickInterceptedException:
+                        print("click intercepted.")
+                    else:
+                        prod.click()
+                        # total_cookies -= store_items_and_prices[k]
+
+                    finally:
+                        total_cookies -= store_items_and_prices[k]
+
                 else:
                     break
 
@@ -118,8 +130,9 @@ while baking_timer > time.time():
         # print(f"Length of store item upgrades: {len(store_item_upgrade)}")
         if len(store_item_upgrade) >= 1:
             buy_upgrade(store_item_upgrade)
+            time.sleep(1)
 
-        time_break = time.time() + 10
+        time_break = time.time() + 15
 
-time.sleep(2)
+time.sleep(3)
 save_game()
